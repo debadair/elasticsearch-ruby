@@ -8,9 +8,8 @@ require "multi_json"
 require "elasticsearch/api/version"
 require "elasticsearch/api/namespace/common"
 require "elasticsearch/api/utils"
-require "elasticsearch/api/actions/params_registry"
+require "elasticsearch/api/params_registry"
 
-Dir[ File.expand_path('../api/actions/**/params_registry.rb', __FILE__) ].each   { |f| require f }
 Dir[ File.expand_path('../api/actions/**/*.rb', __FILE__) ].each   { |f| require f }
 Dir[ File.expand_path('../api/namespace/**/*.rb', __FILE__) ].each { |f| require f }
 
