@@ -6,30 +6,30 @@ module Elasticsearch
   module API
     module Actions
 
-      # Returns true if the cluster returns a successful HTTP response, false otherwise.
+      # Returns whether the cluster is running.
+
       #
-      # @example
+
       #
-      #     client.ping
-      #
-      # @see https://www.elastic.co/guide/
+      # @see https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html
       #
       def ping(arguments={})
+        arguments = arguments.clone
+
+
         method = HTTP_HEAD
-        path   = ""
+        path   = Utils.__pathify ""
         params = {}
         body   = nil
 
-        begin
-          perform_request(method, path, params, body).status == 200 ? true : false
-        rescue Exception => e
-          if e.class.to_s =~ /NotFound|ConnectionFailed/ || e.message =~ /Not\s*Found|404|ConnectionFailed/i
-            false
-          else
-            raise e
-          end
-        end
+        perform_request(method, path, params, body).body
       end
+
+
+      # Register this action with its valid params when the module is loaded.
+      #
+      # @since 6.2.0
+
     end
   end
 end

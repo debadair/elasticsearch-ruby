@@ -7,23 +7,23 @@ module Elasticsearch
   module Indices
       module Actions
 
-        # Performs the refresh operation in one or more indices.
+        # The _upgrade API is no longer useful and will be removed.
 
         #
         # @option arguments [List] :index A comma-separated list of index names; use `_all` or empty string to perform the operation on all indices
 
         #
-        # @see https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-refresh.html
+        # @see https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-upgrade.html
         #
-        def refresh(arguments={})
+        def get_upgrade(arguments={})
           raise ArgumentError, "Required argument 'index' missing" unless arguments[:index]
           arguments = arguments.clone
 
           _index = arguments.delete(:index)
 
 
-          method = HTTP_POST
-          path   = Utils.__pathify "_refresh", Utils.__listify(_index)
+          method = HTTP_GET
+          path   = Utils.__pathify "_upgrade", Utils.__listify(_index)
           params = Utils.__validate_and_extract_params arguments, ParamsRegistry.get(__method__)
           body   = nil
 
@@ -34,7 +34,7 @@ module Elasticsearch
         # Register this action with its valid params when the module is loaded.
         #
         # @since 6.2.0
-        ParamsRegistry.register(:refresh, [
+        ParamsRegistry.register(:get_upgrade, [
           :ignore_unavailable,
           :allow_no_indices,
           :expand_wildcards

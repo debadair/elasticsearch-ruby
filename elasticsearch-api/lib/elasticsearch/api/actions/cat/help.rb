@@ -3,32 +3,39 @@
 # See the LICENSE file in the project root for more information
 
 module Elasticsearch
-  module API
-    module Cat
+    module API
+  module Cat
       module Actions
 
-        # Help information for the Cat API
+        # Returns help for the Cat APIs.
+
         #
-        # @option arguments [Boolean] :help Return help information
+
         #
         # @see https://www.elastic.co/guide/en/elasticsearch/reference/master/cat.html
         #
         def help(arguments={})
+          arguments = arguments.clone
+
+
           method = HTTP_GET
-          path   = "_cat"
+          path   = Utils.__pathify "_cat"
           params = Utils.__validate_and_extract_params arguments, ParamsRegistry.get(__method__)
           body   = nil
 
           perform_request(method, path, params, body).body
         end
 
+
         # Register this action with its valid params when the module is loaded.
         #
-        # @since 6.1.1
+        # @since 6.2.0
         ParamsRegistry.register(:help, [
-            :help,
-            :s ].freeze)
-      end
+          :help,
+          :s
+        ].freeze)
+
+end
     end
   end
 end

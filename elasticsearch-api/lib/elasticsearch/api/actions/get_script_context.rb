@@ -6,24 +6,30 @@ module Elasticsearch
   module API
     module Actions
 
-      # Abort a running benchmark
+      # Returns all script contexts.
+
       #
-      # @example
+
       #
-      #     client.abort_benchmark name: 'my_benchmark'
+      # @see [TODO]
       #
-      # @option arguments [String] :name A benchmark name
-      #
-      # @see https://www.elastic.co/guide/en/elasticsearch/reference/master/search-benchmark.html
-      #
-      def abort_benchmark(arguments={})
-        method = HTTP_POST
-        path   = "_bench/abort/#{arguments[:name]}"
+      def get_script_context(arguments={})
+        arguments = arguments.clone
+
+
+        method = HTTP_GET
+        path   = Utils.__pathify "_script_context"
         params = {}
         body   = nil
 
         perform_request(method, path, params, body).body
       end
+
+
+      # Register this action with its valid params when the module is loaded.
+      #
+      # @since 6.2.0
+
     end
   end
 end

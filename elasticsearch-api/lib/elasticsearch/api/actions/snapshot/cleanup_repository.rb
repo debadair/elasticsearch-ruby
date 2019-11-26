@@ -7,25 +7,26 @@ module Elasticsearch
   module Snapshot
       module Actions
 
-        # Returns information about a repository.
+        # Removes stale data from repository.
 
         #
-        # @option arguments [List] :repository A comma-separated list of repository names
+        # @option arguments [String] :repository A repository name
+        # @option arguments [Hash] :body TODO: Description
 
         #
         # @see https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html
         #
-        def get_repository(arguments={})
+        def cleanup_repository(arguments={})
           raise ArgumentError, "Required argument 'repository' missing" unless arguments[:repository]
           arguments = arguments.clone
 
           _repository = arguments.delete(:repository)
 
 
-          method = HTTP_GET
-          path   = Utils.__pathify "_snapshot", Utils.__listify(_repository)
+          method = HTTP_POST
+          path   = Utils.__pathify "_snapshot/#{_repository}/_cleanup", Utils.__listify(_repository)
           params = Utils.__validate_and_extract_params arguments, ParamsRegistry.get(__method__)
-          body   = nil
+          body   = arguments[:body]
 
           perform_request(method, path, params, body).body
         end
@@ -34,9 +35,9 @@ module Elasticsearch
         # Register this action with its valid params when the module is loaded.
         #
         # @since 6.2.0
-        ParamsRegistry.register(:get_repository, [
+        ParamsRegistry.register(:cleanup_repository, [
           :master_timeout,
-          :local
+          :timeout
         ].freeze)
 
 end

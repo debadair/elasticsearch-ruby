@@ -6,21 +6,35 @@ module Elasticsearch
   module API
     module Actions
 
-      # Abort a particular scroll search and clear all the resources associated with it.
+      # Explicitly clears the search context for a scroll.
+
       #
       # @option arguments [List] :scroll_id A comma-separated list of scroll IDs to clear
       # @option arguments [Hash] :body A comma-separated list of scroll IDs to clear if none was specified via the scroll_id parameter
+
       #
-      # @see http://www.elastic.co/guide/en/elasticsearch/reference/master/search-request-scroll.html
+      # @see https://www.elastic.co/guide/en/elasticsearch/reference/master/search-request-body.html#_clear_scroll_api
       #
       def clear_scroll(arguments={})
-        method = Elasticsearch::API::HTTP_DELETE
-        path   = Utils.__pathify '_search/scroll', Utils.__listify(arguments.delete(:scroll_id))
+        raise ArgumentError, "Required argument 'scroll_id' missing" unless arguments[:scroll_id]
+        arguments = arguments.clone
+
+        _scroll_id = arguments.delete(:scroll_id)
+
+
+        method = HTTP_DELETE
+        path   = Utils.__pathify "_search/scroll", Utils.__listify(_scroll_id)
         params = {}
         body   = arguments[:body]
 
         perform_request(method, path, params, body).body
       end
+
+
+      # Register this action with its valid params when the module is loaded.
+      #
+      # @since 6.2.0
+
     end
   end
 end

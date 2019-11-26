@@ -6,18 +6,30 @@ module Elasticsearch
   module API
     module Actions
 
-      # Return simple information about the cluster (name, version).
+      # Returns basic information about the cluster.
+
       #
-      # @see https://www.elastic.co/guide/
+
+      #
+      # @see https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html
       #
       def info(arguments={})
+        arguments = arguments.clone
+
+
         method = HTTP_GET
-        path   = ""
+        path   = Utils.__pathify ""
         params = {}
         body   = nil
 
         perform_request(method, path, params, body).body
       end
+
+
+      # Register this action with its valid params when the module is loaded.
+      #
+      # @since 6.2.0
+
     end
   end
 end

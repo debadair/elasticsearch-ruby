@@ -3,38 +3,42 @@
 # See the LICENSE file in the project root for more information
 
 module Elasticsearch
-  module API
-    module Cluster
+    module API
+  module Cluster
       module Actions
 
-        # Update cluster settings.
+        # Updates the cluster settings.
+
         #
-        # @example Disable shard allocation in the cluster until restart
+        # @option arguments [Hash] :body The settings to be updated. Can be either `transient` or `persistent` (survives cluster restart). (*Required*)
+
         #
-        #     client.cluster.put_settings body: { transient: { 'cluster.routing.allocation.disable_allocation' => true } }
-        #
-        # @option arguments [Hash] :body The settings to be updated. Can be either `transient` or `persistent`
-        #                                (survives cluster restart).
-        #
-        # @see https://www.elastic.co/guide/reference/api/admin-cluster-update-settings/
+        # @see https://www.elastic.co/guide/en/elasticsearch/reference/master/cluster-update-settings.html
         #
         def put_settings(arguments={})
+          raise ArgumentError, "Required argument 'body' missing" unless arguments[:body]
+          arguments = arguments.clone
+
+
           method = HTTP_PUT
-          path   = "_cluster/settings"
+          path   = Utils.__pathify "_cluster/settings"
           params = Utils.__validate_and_extract_params arguments, ParamsRegistry.get(__method__)
-          body   = arguments[:body] || {}
+          body   = arguments[:body]
 
           perform_request(method, path, params, body).body
         end
 
+
         # Register this action with its valid params when the module is loaded.
         #
-        # @since 6.1.1
+        # @since 6.2.0
         ParamsRegistry.register(:put_settings, [
-            :flat_settings,
-            :master_timeout,
-            :timeout ].freeze)
-      end
+          :flat_settings,
+          :master_timeout,
+          :timeout
+        ].freeze)
+
+end
     end
   end
 end

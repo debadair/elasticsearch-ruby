@@ -3,35 +3,43 @@
 # See the LICENSE file in the project root for more information
 
 module Elasticsearch
-  module API
-    module Ingest
+    module API
+  module Ingest
       module Actions
 
-        # Delete a speficied pipeline
+        # Deletes a pipeline.
+
         #
-        # @option arguments [String] :id Pipeline ID (*Required*)
-        # @option arguments [Time] :master_timeout Explicit operation timeout for connection to master node
-        # @option arguments [Time] :timeout Explicit operation timeout
+        # @option arguments [String] :id Pipeline ID
+
         #
-        # @see https://www.elastic.co/guide/en/elasticsearch/plugins/master/ingest.html
+        # @see https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-pipeline-api.html
         #
         def delete_pipeline(arguments={})
           raise ArgumentError, "Required argument 'id' missing" unless arguments[:id]
-          method = 'DELETE'
-          path   = Utils.__pathify "_ingest/pipeline", Utils.__escape(arguments[:id])
+          arguments = arguments.clone
+
+          _id = arguments.delete(:id)
+
+
+          method = HTTP_DELETE
+          path   = Utils.__pathify "_ingest/pipeline/#{_id}", Utils.__listify(_id)
           params = Utils.__validate_and_extract_params arguments, ParamsRegistry.get(__method__)
           body   = nil
 
           perform_request(method, path, params, body).body
         end
 
+
         # Register this action with its valid params when the module is loaded.
         #
-        # @since 6.1.1
+        # @since 6.2.0
         ParamsRegistry.register(:delete_pipeline, [
-            :master_timeout,
-            :timeout ].freeze)
-      end
+          :master_timeout,
+          :timeout
+        ].freeze)
+
+end
     end
   end
 end
