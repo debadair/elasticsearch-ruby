@@ -11,7 +11,7 @@ module Elasticsearch
 <%- if @spec['documentation']['description']  %>
 <%= '  '*(@namespace_depth+3) %># <%= @spec['documentation']['description'].gsub("\n", "\n#{'  '*(@namespace_depth+3)}# ") %>
 <%- else %>
-<%= '  '*(@namespace_depth+3) %># TODO: Description %>
+<%= '  '*(@namespace_depth+3) %># TODO: Description
 <%- end %>
 <%= '  '*(@namespace_depth+3) %>#
 <%- unless @parts.nil? || @parts.empty? %><%# URL parts -%>
@@ -37,20 +37,17 @@ module Elasticsearch
 <%= '  '*(@namespace_depth+3) %>#
 <%# Method definition -%>
 <%= '  '*(@namespace_depth+3) -%>def <%= @method_name %>(arguments={})
-<%# Arguments -%>
+<%- @required_parts.each do |required| %><%# Arguments -%>
+<%= '  '*(@namespace_depth+4) + "raise ArgumentError, \"Required argument '#{required}' missing\" unless arguments[:#{required}]" + "\n" -%>
+<%- end -%>
 <%= '  '*(@namespace_depth+4) %>arguments = arguments.clone
 <%- @parts.each do |name, info| %>
-<%- if info['required'] %>
-<%= '  '*(@namespace_depth+3) + "raise ArgumentError, \"Required argument '#{name}' missing\" unless arguments[:#{name}]" + "\n" -%>
-<%- end -%>
-<%= '  '*(@namespace_depth+4) + "_#{name}" %> = arguments.delete(:<%=name %>)
-<%- end -%>
-<%- if @spec['body'] && @spec['body']['required'] -%>
-  <%= '  '*(@namespace_depth+3) + "raise ArgumentError, \"Required argument 'body' missing\" unless arguments[:body]" + "\n" -%>
+  <%= '  '*(@namespace_depth+3) + "_#{name}" %> = arguments.delete(:<%=name %>)
 <%- end -%>
 
+<%# This is where I need to check what's available %>
 <%= '  '*(@namespace_depth+4) %>method = <%= @http_method %>
-<%= '  '*(@namespace_depth+4) %>path   = Utils.__pathify "<%= @http_path %>"<%= @http_path_params %>
+<%= '  '*(@namespace_depth+4) %>path   = Utils.__pathify "<%= @http_path %>"<%= @path_parts %>
 <%- unless @params.empty? -%>
 <%= '  '*(@namespace_depth+4) %>params = Utils.__validate_and_extract_params arguments, ParamsRegistry.get(__method__)
 <%- else -%>
@@ -68,7 +65,7 @@ module Elasticsearch
 <%= '  '*(@namespace_depth+3) %># @since 6.2.0
 <%- unless @params.empty? -%>
 <%= '  '*(@namespace_depth+3) %>ParamsRegistry.register(:<%= @method_name %>, [
-<%= '  '*(@namespace_depth+4) %><%= @params.keys.map { |k| ":#{k}" }.join(",\n#{'  '*(@namespace_depth+5)}") %>
+<%= '  '*(@namespace_depth+4) %><%= @params.keys.map { |k| ":#{k}" }.join(",\n#{'  '*(@namespace_depth+4)}") %>
 <%= '  '*(@namespace_depth+3) %>].freeze)
 <%- end -%>
 

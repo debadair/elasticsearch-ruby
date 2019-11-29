@@ -59,16 +59,12 @@ module Elasticsearch
 
         files.each do |filepath|
           file    = @input.join(filepath)
-
           @path   = Pathname(file)
           @json   = MultiJson.load( File.read(@path) )
-
           @spec   = @json.values.first
           say_status 'json', @path, :yellow
 
           @spec['url'] ||= {}
-
-          # say_status 'JSON', @spec.inspect, options[:verbose]
 
           @full_namespace   = @json.keys.first.split('.')
           @namespace_depth  = @full_namespace.size > 0 ? @full_namespace.size-1 : 0
@@ -80,19 +76,23 @@ module Elasticsearch
 
           method            = @spec['url']['paths'].map { |a| a['methods'] }.flatten.first
           @http_method      = "HTTP_#{method}"
-          @http_path_params = __path_params
-          @http_path        = unless false
+
+          @http_path        = unless @parts.empty?
+                                # TODO This is using only the first part
                                 @spec['url']['paths'].first['path']
                                   .split('/')
                                   .compact
                                   .reject { |p| p =~ /^\s*$/ }
-                                  .map { |p| p =~ /\{/ ? "\#\{arguments[:#{p.tr('{}', '')}]\}" : p }
+                                  .map { |p| p =~ /\{/ ? "\#\{_#{p.tr('{}', '')}\}" : p }
                                   .join('/')
                                   .gsub(/^\//, '')
                               else
-                                @spec['url']['paths'].first.gsub(/^\//, '')
+                                @spec['url']['paths'].first['path'].gsub(/^\//, '')
                               end
-          # -- Ruby files
+
+          @required_parts  = __required_parts || []
+          @path_parts = __path_parts
+
 
           @path_to_file = @output.join('api').join( @module_namespace.join('/') ).join("#{@method_name}.rb")
 
@@ -146,6 +146,8 @@ module Elasticsearch
         end
       end
 
+      # Extract parts from each path
+      #
       def __endpoint_parts
         parts = @spec['url']['paths'].select do |a|
           a.keys.include?('parts')
@@ -155,7 +157,9 @@ module Elasticsearch
         (parts.first || [])
       end
 
-      def __path_params
+      # The parts to build the final path
+      #
+      def __path_parts
         return nil if @parts.empty? || @parts.nil?
         params = []
         @parts.each do |name, _|
@@ -164,6 +168,24 @@ module Elasticsearch
         ', ' + params.join(', ')
       end
 
+      # Find parts that are definitely required and should raise an error if
+      # they're not present
+      #
+      def __required_parts
+        required = []
+        required << 'body' if (@spec['body'] && @spec['body']['required'])
+
+        # Get parts from paths
+        parts = @spec['url']['paths'].map { |path| path['parts'] }
+          .compact # remove empty
+          .map(&:keys) # use an array of keys only
+
+        unless parts.empty?
+          required << parts.inject(:&)
+        end
+
+        required.flatten
+      end
     end
   end
 end
